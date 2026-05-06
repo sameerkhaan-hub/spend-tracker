@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>VelvetSpend Pro | Monthly & Yearly Tracker</title>
+    <!-- Google Fonts + Icons + Chart.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0a0c1c 0%, #02040e 100%);
+            min-height: 100vh;
+            padding: 1.8rem 1.2rem;
+            color: #eef5ff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1e2c;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+
+        .glass-card {
+            background: rgba(18, 22, 45, 0.7);
+            backdrop-filter: blur(14px);
+            border-radius: 2rem;
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .logo h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo p {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+        .clear-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            color: #fca5a5;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .clear-btn:hover {
+            background: rgba(239, 68, 68, 0.35);
+            border-color: #ef4444;
+        }
+
+        /* stats row - now 4 cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(12, 15, 32, 0.8);
+            backdrop-filter: blur(8px);
+            border-radius: 1.5rem;
+            padding: 0.9rem 1.2rem;
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
+        .stat-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a5b4fc;
+            margin-bottom: 0.4rem;
+        }
+        .stat-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .stat-sub {
+            font-size: 0.65rem;
+            color: #6b7280;
+            margin-top: 0.2rem;
+        }
+
+        /* main grid : form + category chart */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 800px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-card, .chart-card {
+            padding: 1.3rem 1.5rem;
+        }
+        .form-title, .chart-title, .monthly-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            border-left: 4px solid #4f46e5;
+            padding-left: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-group label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            border-radius: 1.2rem;
+            padding: 0.7rem 1rem;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: #818cf8;
+        }
+        .add-btn {
+            background: linear-gradient(95deg, #4f46e5, #7c3aed);
+            width: 100%;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: 0.2s;
+        }
+        .add-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            margin: 0.5rem 0;
+        }
+        canvas#categoryChart {
+            max-height: 200px;
+            width: 100%;
+        }
+
+        /* monthly graph section */
+        .monthly-section {
+            margin-bottom: 2rem;
+            padding: 1.3rem 1.5rem;
+        }
+        .monthly-title {
+            margin-bottom: 1rem;
+        }
+        .monthly-graph-container {
+            position: relative;
+            height: 240px;
+            width: 100%;
+        }
+
+        /* transaction list */
+        .history-section {
+            padding: 1.3rem 1.5rem;
+        }
+        .transaction-list {
+            max-height: 340px;
+            overflow-y: auto;
+        }
+        .transaction-item {
+            background: rgba(25, 30, 55, 0.7);
+            border-radius: 1.2rem;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.7rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+            border: 1px solid rgba(79, 70, 229, 0.15);
+        }
+        .tx-info .tx-desc {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .tx-meta {
+            display: flex;
+            gap: 0.8rem;
+            font-size: 0.65rem;
+            color: #9ca3af;
+            margin-top: 0.2rem;
+        }
+        .tx-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fbbf24;
+        }
+        .delete-tx {
+            background: rgba(220, 38, 38, 0.2);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            color: #f87171;
+            cursor: pointer;
+        }
+        .empty-list {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #4b5563;
+        }
+        i.fa, i.far, i.fas {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            <h1><i class="fas fa-chart-line" style="color: #a78bfa;"></i> VelvetSpend Pro</h1>
+            <p>monthly · yearly · insights</p>
+        </div>
+        <button id="clearAllBtn" class="clear-btn"><i class="fas fa-trash-alt"></i> Reset all</button>
+    </div>
+
+    <!-- Stats Row: Total, Count, This Month, This Year -->
+    <div class="stats-row">
+        <div class="stat-card"><div class="stat-title"><i class="fas fa-chart-line"></i> TOTAL SPENT</div><div class="stat-value" id="totalSpent">$0</div><div class="stat-sub">lifetime</div></div>
+        <div class="stat-card"><div class="stat-title"><i class="fas fa-receipt"></i> TRANSACTIONS</div><div class="stat-value" id="txCount">0</div><div class="stat-sub">entries</div></div>
+        <div class="stat-card"><div class="stat-title"><i class="fas fa-calendar-alt"></i> THIS MONTH</div><div class="stat-value" id="monthSpent">$0</div><div class="stat-sub" id="currentMonthLabel">current month</div></div>
+        <div class="stat-card"><div class="stat-title"><i class="fas fa-calendar-year"></i> THIS YEAR</div><div class="stat-value" id="yearSpent">$0</div><div class="stat-sub" id="currentYearLabel">current year</div></div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- add expense form -->
+        <div class="glass-card form-card">
+            <div class="form-title"><i class="fas fa-plus-circle"></i> Add expense</div>
+            <div class="input-group"><label><i class="fas fa-tag"></i> Description</label><input type="text" id="descInput" placeholder="e.g., Groceries, Netflix"></div>
+            <div class="input-group"><label><i class="fas fa-dollar-sign"></i> Amount ($)</label><input type="number" id="amountInput" step="0.01" placeholder="0.00"></div>
+            <div class="input-group"><label><i class="fas fa-layer-group"></i> Category</label><select id="categorySelect"><option value="Food">🍔 Food</option><option value="Transport">🚗 Transport</option><option value="Entertainment">🎬 Entertainment</option><option value="Shopping">🛍️ Shopping</option><option value="Bills">⚡ Bills</option><option value="Other">📌 Other</option></select></div>
+            <div class="input-group"><label><i class="fas fa-calendar-alt"></i> Date</label><input type="date" id="dateInput"></div>
+            <button id="addExpenseBtn" class="add-btn"><i class="fas fa-wallet"></i> Add expense</button>
+        </div>
+
+        <!-- category doughnut chart -->
+        <div class="glass-card chart-card">
+            <div class="chart-title"><i class="fas fa-chart-pie"></i> Spending by category</div>
+            <div class="chart-container"><canvas id="categoryChart" width="400" height="200"></canvas></div>
+            <div id="chartHint" style="text-align:center; font-size:0.7rem; color:#8b8fb2; margin-top:5px;"></div>
+        </div>
+    </div>
+
+    <!-- Monthly spend bar chart (last 6 months) -->
+    <div class="glass-card monthly-section">
+        <div class="monthly-title"><i class="fas fa-chart-bar"></i> Monthly trend (last 6 months)</div>
+        <div class="monthly-graph-container">
+            <canvas id="monthlyBarChart" width="800" height="240" style="width:100%; height:auto; max-height:240px;"></canvas>
+        </div>
+        <div id="monthlyHint" style="text-align:center; font-size:0.7rem; margin-top:8px; color:#8b8fb2;">📊 spending per calendar month</div>
+    </div>
+
+    <!-- transaction history -->
+    <div class="glass-card history-section">
+        <div class="history-header" style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <div class="history-title"><i class="fas fa-list-ul"></i> Expense log</div>
+            <span style="font-size:0.7rem;"><i class="fas fa-database"></i> local storage</span>
+        </div>
+        <div id="transactionListContainer" class="transaction-list"></div>
+    </div>
+    <footer>premium tracker • monthly & yearly insights • offline ready</footer>
+</div>
+
+<script>
+    // ---------- CONFIG ----------
+    const CATEGORIES = ["Food", "Transport", "Entertainment", "Shopping", "Bills", "Other"];
+    let transactions = [];
+    let categoryChart = null;
+    let monthlyChart = null;
+
+    // DOM elements
+    const totalSpentEl = document.getElementById('totalSpent');
+    const txCountEl = document.getElementById('txCount');
+    const monthSpentEl = document.getElementById('monthSpent');
+    const yearSpentEl = document.getElementById('yearSpent');
+    const currentMonthLabel = document.getElementById('currentMonthLabel');
+    const currentYearLabel = document.getElementById('currentYearLabel');
+    const descInput = document.getElementById('descInput');
+    const amountInput = document.getElementById('amountInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const dateInput = document.getElementById('dateInput');
+    const addBtn = document.getElementById('addExpenseBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const transactionContainer = document.getElementById('transactionListContainer');
+
+    // helpers
+    function getTodayString() { return new Date().toISOString().slice(0,10); }
+    function formatMoney(amount) { return '$' + amount.toFixed(2); }
+
+    // get current year and month names
+    function getCurrentYearMonth() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        return { year, month, monthName: now.toLocaleString('default', { month: 'short' }) };
+    }
+
+    // compute monthly & yearly totals
+    function updateStats() {
+        if (!transactions.length) {
+            totalSpentEl.innerText = formatMoney(0);
+            txCountEl.innerText = '0';
+            monthSpentEl.innerText = formatMoney(0);
+            yearSpentEl.innerText = formatMoney(0);
+            currentMonthLabel.innerText = `${getCurrentYearMonth().monthName} ${getCurrentYearMonth().year}`;
+            currentYearLabel.innerText = `${getCurrentYearMonth().year}`;
+            return;
+        }
+        let total = 0;
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth(); // 0-indexed
+        let monthTotal = 0;
+        let yearTotal = 0;
+
+        for (let t of transactions) {
+            total += t.amount;
+            const [yyyy, mm] = t.date.split('-');
+            const txYear = parseInt(yyyy);
+            const txMonth = parseInt(mm) - 1;
+            if (txYear === currentYear) {
+                yearTotal += t.amount;
+                if (txMonth === currentMonth) monthTotal += t.amount;
+            }
+        }
+        totalSpentEl.innerText = formatMoney(total);
+        txCountEl.innerText = transactions.length;
+        monthSpentEl.innerText = formatMoney(monthTotal);
+        yearSpentEl.innerText = formatMoney(yearTotal);
+        const { monthName, year } = getCurrentYearMonth();
+        currentMonthLabel.innerText = `${monthName} ${year}`;
+        currentYearLabel.innerText = `${year}`;
+    }
+
+    // get last 6 months (including current) as labels (YYYY-MM) and compute spending per month
+    function getLastSixMonthsSpending() {
+        const now = new Date();
+        const months = [];
+        const spendingMap = new Map(); // key "YYYY-MM" => total
+        // pre-fill map for last 6 months
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+            months.push({ key, label: d.toLocaleString('default', { month: 'short' }) + ' ' + d.getFullYear() });
+            spendingMap.set(key, 0);
+        }
+        // aggregate transactions
+        for (let tx of transactions) {
+            const [yyyy, mm] = tx.date.split('-');
+            const key = `${yyyy}-${mm}`;
+            if (spendingMap.has(key)) {
+                spendingMap.set(key, spendingMap.get(key) + tx.amount);
+            }
+        }
+        const labels = months.map(m => m.label);
+        const data = months.map(m => spendingMap.get(m.key));
+        return { labels, data };
+    }
+
+    // update monthly bar chart
+    function updateMonthlyChart() {
+        const { labels, data } = getLastSixMonthsSpending();
+        const ctx = document.getElementById('monthlyBarChart').getContext('2d');
+        if (monthlyChart) monthlyChart.destroy();
+        monthlyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Spent ($)',
+                    data: data,
+                    backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    barPercentage: 0.65,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    tooltip: { callbacks: { label: (ctx) => `$${ctx.raw.toFixed(2)}` } },
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#cbd5e1', callback: (val) => '$' + val } },
+                    x: { ticks: { color: '#cbd5e1', font: { size: 10 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // category chart
+    function updateCategoryChart() {
+        const catMap = { Food:0, Transport:0, Entertainment:0, Shopping:0, Bills:0, Other:0 };
+        for (let t of transactions) catMap[t.category] += t.amount;
+        const labels = [];
+        const data = [];
+        const bgColors = ['#4f46e5','#f97316','#10b981','#f59e0b','#ec489a','#8b5cf6'];
+        for (let c of CATEGORIES) {
+            if (catMap[c] > 0) {
+                labels.push(c);
+                data.push(catMap[c]);
+            }
+        }
+        if (data.length === 0) {
+            if (categoryChart) categoryChart.destroy();
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['No data'], datasets: [{ data: [1], backgroundColor: ['#3b3b5e'] }] }, options: { cutout: '55%' } });
+            document.getElementById('chartHint').innerText = '✨ add expenses to see breakdown';
+            return;
+        }
+        if (categoryChart) categoryChart.destroy();
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        categoryChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors.slice(0, labels.length), borderWidth: 0, cutout: '55%' }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 10 } } }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw.toFixed(2)} USD` } } } }
+        });
+        document.getElementById('chartHint').innerHTML = '🍩 category distribution';
+    }
+
+    // render transaction list with delete
+    function renderTransactions() {
+        if (!transactions.length) {
+            transactionContainer.innerHTML = `<div class="empty-list"><i class="fas fa-credit-card"></i> No expenses yet — add your first</div>`;
+            return;
+        }
+        const sorted = [...transactions].sort((a,b) => (a.date > b.date ? -1 : (a.date < b.date ? 1 : b.id - a.id)));
+        let html = '';
+        for (let tx of sorted) {
+            let catIcon = { iconClass: 'fa-utensils' };
+            if (tx.category === 'Transport') catIcon.iconClass = 'fa-car';
+            else if (tx.category === 'Entertainment') catIcon.iconClass = 'fa-film';
+            else if (tx.category === 'Shopping') catIcon.iconClass = 'fa-bag-shopping';
+            else if (tx.category === 'Bills') catIcon.iconClass = 'fa-bolt';
+            else if (tx.category === 'Other') catIcon.iconClass = 'fa-tag';
+            html += `
+                <div class="transaction-item" data-id="${tx.id}">
+                    <div class="tx-info">
+                        <div class="tx-desc"><i class="fas ${catIcon.iconClass}" style="margin-right:0.5rem; color:#a78bfa;"></i>${escapeHtml(tx.description)}</div>
+                        <div class="tx-meta"><span><i class="far fa-calendar-alt"></i> ${tx.date}</span><span class="category-badge" style="background:#2d2a55; padding:0.1rem 0.6rem; border-radius:1rem;">${tx.category}</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <div class="tx-amount">${formatMoney(tx.amount)}</div>
+                        <button class="delete-tx" data-id="${tx.id}"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+        transactionContainer.innerHTML = html;
+        document.querySelectorAll('.delete-tx').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                deleteTransactionById(id);
+            });
+        });
+    }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
+
+    function deleteTransactionById(id) {
+        transactions = transactions.filter(t => t.id !== id);
+        persistData();
+        refreshAllUI();
+    }
+
+    function addTransaction() {
+        const desc = descInput.value.trim();
+        let amount = parseFloat(amountInput.value);
+        const category = categorySelect.value;
+        let date = dateInput.value;
+        if (!desc) { alert("Description required"); return; }
+        if (isNaN(amount) || amount <= 0) { alert("Valid amount > 0 required"); return; }
+        if (!date) date = getTodayString();
+        amount = Math.round(amount * 100) / 100;
+        const newId = Date.now();
+        transactions.push({ id: newId, description: desc, amount, category, date });
+        persistData();
+        refreshAllUI();
+        descInput.value = '';
+        amountInput.value = '';
+        categorySelect.value = 'Food';
+        dateInput.value = getTodayString();
+        descInput.focus();
+    }
+
+    function clearAll() {
+        if (transactions.length && confirm("Permanently delete ALL expenses?")) {
+            transactions = [];
+            persistData();
+            refreshAllUI();
+        }
+    }
+
+    function refreshAllUI() {
+        updateStats();
+        renderTransactions();
+        updateCategoryChart();
+        updateMonthlyChart();
+    }
+
+    function persistData() { localStorage.setItem('velvetSpendProData', JSON.stringify(transactions)); }
+    function loadData() {
+        const stored = localStorage.getItem('velvetSpendProData');
+        if (stored) {
+            try { transactions = JSON.parse(stored); } catch(e) { transactions = []; }
+        }
+        if (!transactions.length) {
+            // demo premium data (with mixed months to show monthly chart)
+            const today = getTodayString();
+            const lastMonth = new Date(new Date().setMonth(new Date().getMonth()-1)).toISOString().slice(0,10);
+            const twoMonthsAgo = new Date(new Date().setMonth(new Date().getMonth()-2)).toISOString().slice(0,10);
+            transactions = [
+                { id: Date.now()+1, description: "Grocery run", amount: 128.40, category: "Food", date: today },
+                { id: Date.now()+2, description: "Uber to airport", amount: 45.00, category: "Transport", date: today },
+                { id: Date.now()+3, description: "Netflix subscription", amount: 15.99, category: "Entertainment", date: lastMonth },
+                { id: Date.now()+4, description: "Electricity bill", amount: 87.30, category: "Bills", date: lastMonth },
+                { id: Date.now()+5, description: "New sneakers", amount: 119.99, category: "Shopping", date: twoMonthsAgo },
+                { id: Date.now()+6, description: "Concert ticket", amount: 65.00, category: "Entertainment", date: twoMonthsAgo }
+            ];
+            persistData();
+        }
+    }
+
+    // initialize
+    function init() {
+        loadData();
+        if (!dateInput.value) dateInput.value = getTodayString();
+        refreshAllUI();
+        addBtn.addEventListener('click', addTransaction);
+        clearAllBtn.addEventListener('click', clearAll);
+        document.querySelectorAll('#descInput, #amountInput').forEach(inp => inp.addEventListener('keypress', (e) => { if(e.key === 'Enter') addTransaction(); }));
+    }
+    init();
+</script>
+</body>
+</html>
